@@ -5,6 +5,7 @@ let dependencies: [Target.Dependency] = [
     .product(name: "Algorithms", package: "swift-algorithms"),
     .product(name: "Collections", package: "swift-collections"),
     .product(name: "ArgumentParser", package: "swift-argument-parser"),
+    .product(name: "Parsing", package: "swift-parsing"),
 ]
 
 let package = Package(
@@ -22,7 +23,11 @@ let package = Package(
             .upToNextMajor(from: "1.2.0")),
         .package(
             url: "https://github.com/apple/swift-format.git",
-            .upToNextMajor(from: "509.0.0"))
+            .upToNextMajor(from: "509.0.0")),
+        .package(
+            url: "https://github.com/pointfreeco/swift-parsing.git",
+            .upToNextMajor(from: "0.13.0")
+        ),
     ],
     targets: [
         .executableTarget(
@@ -33,11 +38,11 @@ let package = Package(
             name: "AdventOfCodeTests",
             dependencies: ["AdventOfCode"] + dependencies
         ),
-        .plugin(name: "DayBump",
-                capability: .command(intent: .custom(verb: "day-bump",
-                                                     description: "Creates a day"),
-                                     permissions: [
-                                        .writeToPackageDirectory(reason: "This will create a new day")
-                                     ]))
+        .executableTarget(
+            name: "FetchInputs",
+            dependencies: [
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
+            ]
+        ),
     ]
 )
