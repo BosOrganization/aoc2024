@@ -21,7 +21,7 @@ func input(day: Int, for session: String? = nil) async throws -> Data {
     try setCookie(session: session)
 
     let url = url(day: day)
-    let request = URLRequest(url: url, cachePolicy: .returnCacheDataElseLoad)
+    let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData)
 
     let (bytes, response) = try await URLSession.shared.data(for: request)
     guard (response as? HTTPURLResponse)?.statusCode == 200 else {
@@ -44,7 +44,7 @@ func setCookie(session: String?) throws {
     } else {
         let homeDirURL = FileManager.default.homeDirectoryForCurrentUser
         let sessionURL = homeDirURL.appending(component: ".adventofcode_session")
-        let rawID = try String(contentsOf: sessionURL)
+        let rawID = try String(contentsOf: sessionURL, encoding: .utf8)
         sessionID = rawID.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
@@ -79,7 +79,9 @@ struct AdventOfCode: AsyncParsableCommand {
         if let d = self.day {
             day = d
         } else {
-            let components = Calendar.current.dateComponents([.day], from: .now)
+            var currentCalendar = Calendar.current
+            currentCalendar.timeZone = TimeZone(abbreviation: "EST")!
+            let components = currentCalendar.dateComponents([.day], from: .now)
             day = components.day!
         }
         let data = try await input(day: day)

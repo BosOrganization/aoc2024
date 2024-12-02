@@ -34,10 +34,6 @@ let package = Package(
             name: "AdventOfCode",
             dependencies: dependencies,
             resources: [.copy("Data")]),
-        .testTarget(
-            name: "AdventOfCodeTests",
-            dependencies: ["AdventOfCode"] + dependencies
-        ),
         .executableTarget(
             name: "FetchInputs",
             dependencies: [

@@ -2,26 +2,58 @@ import Algorithms
 import Foundation
 
 struct Day02: AdventDay {
+    let maxDistance = 3
     var data: String
 
-    var entities: ([Int],[Int]) {
+    var entities: ([[Int]]) {
         let lines = data.split(separator: "\n").compactMap { String($0) }
-        var left: [Int] = []
-        var right: [Int] = []
+        var entities: [[Int]] = []
         for line in lines {
             let trimmedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            let splitLint = trimmedLine.split(separator: " ").map({ String($0) })
-            left.append(Int(splitLint[0])!)
-            right.append(Int(splitLint[1])!)
+            let intLine = trimmedLine.split(separator: " ").compactMap({ Int($0) })
+            entities.append(intLine)
         }
-        return (left, right)
+        return entities
     }
 
     func part1() -> Any {
-        0
+        entities.reduce(0, { $0 + (isIncreasing($1) == nil || isDecreasing($1) == nil ? 1 : 0) })
     }
 
     func part2() -> Any {
-        0
+        var numberOfSafe = 0
+        for entity in entities {
+            if isDecreasing(entity) == nil || isIncreasing(entity) == nil {
+                numberOfSafe += 1
+                continue
+            }
+            for i in 0..<entity.count {
+                var newEntity = entity
+                newEntity.remove(at: i)
+                if isDecreasing(newEntity) == nil || isIncreasing(newEntity) == nil {
+                    numberOfSafe += 1
+                    break
+                }
+            }
+        }
+        return numberOfSafe
+    }
+
+    func isIncreasing(_ numbers: [Int]) -> Int? {
+        for i in 1..<numbers.count {
+            if numbers[i] <= numbers[i-1] || abs(numbers[i] - numbers[i-1]) > maxDistance {
+                return i
+            }
+        }
+        return nil
+    }
+
+    func isDecreasing(_ numbers: [Int]) -> Int? {
+        for i in 1..<numbers.count {
+            if numbers[i] >= numbers[i-1] || abs(numbers[i] - numbers[i-1]) > maxDistance {
+                return i
+            }
+        }
+        return nil
     }
 }
