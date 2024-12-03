@@ -6,11 +6,11 @@ struct Day02: AdventDay {
     var data: String
 
     var entities: ([[Int]]) {
-        let lines = data.split(separator: "\n").compactMap { String($0) }
+        let lines = data.lines
         var entities: [[Int]] = []
         for line in lines {
             let trimmedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            let intLine = trimmedLine.split(separator: " ").compactMap({ Int($0) })
+            let intLine = trimmedLine.splitInts()
             entities.append(intLine)
         }
         return entities
