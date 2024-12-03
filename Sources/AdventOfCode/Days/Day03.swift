@@ -12,60 +12,60 @@ import RegexBuilder
 struct Day03: AdventDay {
     var data: String
 
-    func part1() -> Any {
-        let firstRef = Reference(Int.self)
-        let secondRef = Reference(Int.self)
-        let regex = Regex {
+    private let firstMul = Reference(Int.self)
+    private let secondMul = Reference(Int.self)
+
+    private var mulRegEx: some RegexComponent {
+        Regex {
             "mul("
-            Capture(OneOrMore(.digit), as: firstRef) { item in
+            Capture(OneOrMore(.digit), as: firstMul) { item in
                 Int(item)!
             }
             ","
-            Capture(OneOrMore(.digit), as: secondRef) { item in
+            Capture(OneOrMore(.digit), as: secondMul) { item in
                 Int(item)!
             }
             ")"
           }
           .anchorsMatchLineEndings()
-        return data.matches(of: regex).reduce(into: 0) { partialResult, match in
-            partialResult += match[firstRef] * match[secondRef]
+    }
+
+    private var doRegex: some RegexComponent {
+        Regex {
+            "do()"
+        }
+        .anchorsMatchLineEndings()
+    }
+
+    private var dontRegex: some RegexComponent {
+        Regex {
+            "don't()"
+        }
+        .anchorsMatchLineEndings()
+    }
+
+    func part1() -> Any {
+        return data.matches(of: mulRegEx).reduce(into: 0) { partialResult, match in
+            partialResult += match[firstMul] * match[secondMul]
         }
     }
 
     func part2() -> Any {
-        let firstRef = Reference(Int.self)
-        let secondRef = Reference(Int.self)
-        let multiplyRegex = Regex {
-            "mul("
-            Capture(OneOrMore(.digit), as: firstRef) { item in
-                Int(item)!
-            }
-            ","
-            Capture(OneOrMore(.digit), as: secondRef) { item in
-                Int(item)!
-            }
-            ")"
-          }
-          .anchorsMatchLineEndings()
-        let multiplyInstructions = data.matches(of: multiplyRegex).reduce(into: [(Instruction, Range<String.Index>)]()) { partialResult, match in
-            partialResult.append((.multiply(match[firstRef], match[secondRef]), match.range))
+        // Grab all of the instructions
+        let multiplyInstructions = data.matches(of: mulRegEx).reduce(into: [(Instruction, Range<String.Index>)]()) { partialResult, match in
+            partialResult.append((.multiply(match[firstMul], match[secondMul]), match.range))
         }
 
-        let doRegex = Regex {
-            "do()"
-        }
         let doInstructions = data.matches(of: doRegex).reduce(into: [(Instruction, Range<String.Index>)]()) { partialResult, match in
             partialResult.append((.doStuff, match.range))
         }
 
-        let dontRegex = Regex {
-            "don't()"
-        }
         let dontInstructions = data.matches(of: dontRegex).reduce(into: [(Instruction, Range<String.Index>)]()) { partialResult, match in
             partialResult.append((.dontDoStuff, match.range))
         }
 
         let allInstructions = multiplyInstructions + doInstructions + dontInstructions
+        // Order the instructions by where they start
         let sortedInstructions = allInstructions.sorted { $0.1.lowerBound < $1.1.lowerBound }
 
         var doStuff = true

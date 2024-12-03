@@ -31,6 +31,7 @@ struct Day01: AdventDay {
 
     func part2() -> Any {
         let (left, right) = self.entities
+        // Group all the right items into their counts
         let rightGroupings = right.reduce(into: [:]) { counts, number in counts[number, default: 0] += 1 }
         var score = 0
         for leftNum in left {

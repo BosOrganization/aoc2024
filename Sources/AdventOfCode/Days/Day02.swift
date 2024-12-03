@@ -23,10 +23,13 @@ struct Day02: AdventDay {
     func part2() -> Any {
         var numberOfSafe = 0
         for entity in entities {
+            // If the entity is always increasing/decreasing then it's good to go
             if isDecreasing(entity) == nil || isIncreasing(entity) == nil {
                 numberOfSafe += 1
                 continue
             }
+            // If the entity doesnt adhere then remove each item and check the array to see if it works
+            // stopping when the array works or we hit the end of the array
             for i in 0..<entity.count {
                 var newEntity = entity
                 newEntity.remove(at: i)
@@ -39,6 +42,7 @@ struct Day02: AdventDay {
         return numberOfSafe
     }
 
+    /// All of the numbers supplied are always increasing by less than the max distance
     func isIncreasing(_ numbers: [Int]) -> Int? {
         for i in 1..<numbers.count {
             if numbers[i] <= numbers[i-1] || abs(numbers[i] - numbers[i-1]) > maxDistance {
@@ -48,6 +52,7 @@ struct Day02: AdventDay {
         return nil
     }
 
+    /// All of the numbers supplied are always decreasing by less than the max distance
     func isDecreasing(_ numbers: [Int]) -> Int? {
         for i in 1..<numbers.count {
             if numbers[i] >= numbers[i-1] || abs(numbers[i] - numbers[i-1]) > maxDistance {
