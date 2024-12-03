@@ -13,76 +13,67 @@ struct Day03: AdventDay {
     var data: String
 
     func part1() -> Any {
-        let firstRef = Reference(Substring.self)
-        let secondRef = Reference(Substring.self)
+        let firstRef = Reference(Int.self)
+        let secondRef = Reference(Int.self)
         let regex = Regex {
             "mul("
-            Capture(as: firstRef) {
-                OneOrMore(.digit)
+            Capture(OneOrMore(.digit), as: firstRef) { item in
+                Int(item)!
             }
             ","
-            Capture(as: secondRef) {
-                OneOrMore(.digit)
+            Capture(OneOrMore(.digit), as: secondRef) { item in
+                Int(item)!
             }
             ")"
           }
           .anchorsMatchLineEndings()
-        var result = 0
-        for item in data.matches(of: regex) {
-            let first = Int(item[firstRef])!
-            let second = Int(item[secondRef])!
-            guard abs(first) < 1000, abs(second) < 1000 else { continue }
-            result += first * second
+        return data.matches(of: regex).reduce(into: 0) { partialResult, match in
+            partialResult += match[firstRef] * match[secondRef]
         }
-        return result
     }
 
     func part2() -> Any {
-        let firstRef = Reference(Substring.self)
-        let secondRef = Reference(Substring.self)
-        let regexMultiply = Regex {
+        let firstRef = Reference(Int.self)
+        let secondRef = Reference(Int.self)
+        let multiplyRegex = Regex {
             "mul("
-            Capture(as: firstRef) {
-                OneOrMore(.digit)
+            Capture(OneOrMore(.digit), as: firstRef) { item in
+                Int(item)!
             }
             ","
-            Capture(as: secondRef) {
-                OneOrMore(.digit)
+            Capture(OneOrMore(.digit), as: secondRef) { item in
+                Int(item)!
             }
             ")"
           }
           .anchorsMatchLineEndings()
-        var result = 0
-        var instructions: [(Instruction, Range<String.Index>)] = []
-        for item in data.matches(of: regexMultiply) {
-            let first = Int(item[firstRef])!
-            let second = Int(item[secondRef])!
-            guard abs(first) < 1000, abs(second) < 1000 else { continue }
-            instructions.append((.multiply(first, second), item.range))
+        let multiplyInstructions = data.matches(of: multiplyRegex).reduce(into: [(Instruction, Range<String.Index>)]()) { partialResult, match in
+            partialResult.append((.multiply(match[firstRef], match[secondRef]), match.range))
         }
 
         let doRegex = Regex {
             "do()"
         }
-        for item in data.matches(of: doRegex) {
-            instructions.append((.doStuff, item.range))
+        let doInstructions = data.matches(of: doRegex).reduce(into: [(Instruction, Range<String.Index>)]()) { partialResult, match in
+            partialResult.append((.doStuff, match.range))
         }
 
         let dontRegex = Regex {
             "don't()"
         }
-        for item in data.matches(of: dontRegex) {
-            instructions.append((.dontDoStuff, item.range))
+        let dontInstructions = data.matches(of: dontRegex).reduce(into: [(Instruction, Range<String.Index>)]()) { partialResult, match in
+            partialResult.append((.dontDoStuff, match.range))
         }
 
-        let sortedInstructions = instructions.sorted { $0.1.lowerBound < $1.1.lowerBound }
+        let allInstructions = multiplyInstructions + doInstructions + dontInstructions
+        let sortedInstructions = allInstructions.sorted { $0.1.lowerBound < $1.1.lowerBound }
 
         var doStuff = true
-        for instruction in sortedInstructions {
+        return sortedInstructions.reduce(into: 0) { partialResult, instruction in
             switch instruction.0 {
             case let .multiply(first, second):
                 if doStuff {
-                    result += first * second
+                    partialResult += first * second
                 }
             case .doStuff:
                 doStuff = true
@@ -90,8 +81,6 @@ struct Day03: AdventDay {
                 doStuff = false
             }
         }
-
-        return result
     }
 
     enum Instruction {
